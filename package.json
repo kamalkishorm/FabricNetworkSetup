@@ -1,0 +1,73 @@
+{
+  "name": "FabricNetworkSetup",
+  "version": "1.0.0",
+  "description": "A demonstration basic network setup of 3 organization and install & invoke chaincode on Hyperledger Fabric.",
+  "main": "app.js",
+  "scripts-info": {
+    "info": "List available script",
+    "start-orderer": "Start the orderer container",
+    "stop-orderer": "Stop the orderer container",
+    "start-containers": "Starts all containers",
+    "stop-containers": "Stops the containers",
+    "create-channel": "Create the Channel",
+    "join-channel": "Join Peers to the channel",
+    "install-chaincode": "Install the chaincode on the peers",
+    "instantiate-chaincode": "Instantiate the chaincode for the channel",
+    "initLedger-chaincode": "Initializing Fabcar Ledger",
+    "invoke-transaction": "Invoke a transaction",
+    "query-chaincode": "Query the chaincode"
+  },
+  "scripts": {
+    "info": "npm-scripts-info",
+    "clean_production": "shx rm -rf ./production",
+    "docker-start-orderer": "docker-compose -f docker-compose-cli.yaml up ca.org1.neo.com orderer1.neo.com",
+    "docker-start-containers": "docker-compose -f docker-compose-cli.yaml up",
+    "start-orderer": "npm-run-all clean_production setEnviroment docker-start-orderer",
+    "start-containers": "npm-run-all clean_production setEnviroment docker-start-containers",
+    "stop-orderer": "docker-compose -f docker-compose-cli.yaml down ca.org1.neo.com orderer1.neo.com",
+    "stop-containers": "docker-compose -f docker-compose-cli.yaml down",
+    "create-channel": "ts-node src/create-channel.ts",
+    "join-channel": "ts-node src/join-channel.ts",
+    "install-chaincode": "ts-node src/install-chaincode.ts",
+    "instantiate-chaincode": "ts-node src/instantiate-chaincode.ts",
+    "initLedger-chaincode": "ts-node src/initLedger-chaincode.ts",
+    "invoke-transaction": "ts-node src/invoke-transaction.ts",
+    "query-chaincode": "ts-node src/query-chaincode.ts",
+    "setEnviroment": "ts-node src/config.ts",
+    "start": "node ./scripts/app.js",
+    "query": "node ./scripts/query.js",
+    "up": "sh ./scripts/networkUp.sh",
+    "down": "sh ./scripts/networkDown.sh"
+  },
+  "devDependencies": {
+    "@types/bytebuffer": "^5.0.33",
+    "npm-run-all": "^4.0.2",
+    "npm-scripts-info": "^0.3.6",
+    "shx": "^0.2.2",
+    "ts-node": "^3.2.1",
+    "typescript": "^2.4.2"
+  },
+  "dependencies": {
+    "fabric-ca-client": "^1.1.0",
+    "fabric-client": "^1.1.0",
+    "grpc": "^1.11.0",
+    "hfc": "^0.6.5",
+    "node-pre-gyp": "^0.9.1",
+    "npm": "^6.0.0",
+    "os": "latest",
+    "path": "latest",
+    "util": "latest",
+    "winston": "^2.4.2"
+  },
+  "engines": {
+    "node": "^8.11.*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neo7668/FabricNetworkSetup.git"
+  },
+  "author": {
+    "name": "Kamal Kishor Mehra"
+  },
+  "license": "GNU-3.0"
+}

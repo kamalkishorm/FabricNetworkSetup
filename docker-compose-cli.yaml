@@ -1,0 +1,398 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+volumes:
+  orderer1.neo.com:
+  # orderer2.neo.com:
+  # orderer1.neospykar.com:
+  peer0.org1.neo.com:
+  peer1.org1.neo.com:
+  peer2.org1.neo.com:
+  peer0.org2.neo.com:
+  peer1.org2.neo.com:
+  peer2.org2.neo.com:
+  peer0.org3.neo.com:
+  peer1.org3.neo.com:
+  peer2.org3.neo.com:
+  # membersrvc:
+  # ca.org1.neo.com:
+  # peer0.org4.neospykar.com:
+  # peer1.org4.neospykar.com:
+  # peer2.org4.neospykar.com:
+  # peer0.org5.neospykar.com:
+  # peer1.org5.neospykar.com:
+  # peer2.org5.neospykar.com:
+
+networks:
+  neonetwork:
+
+services:
+  orderer1.neo.com:
+    extends:
+      file: base/docker-compose-base.yaml
+      service: orderer1.neo.com
+    container_name: orderer1.neo.com
+    networks:
+      - neonetwork
+
+  # orderer2.neo.com:
+  #   extends:
+  #     file:   base/docker-compose-base.yaml
+  #     service: orderer2.neo.com
+  #   container_name: orderer2.neo.com
+  #   networks:
+  #     - neonetwork
+
+  # orderer1.neospykar.com:
+  #   extends:
+  #     file:   base/docker-compose-base.yaml
+  #     service: orderer1.neospykar.com
+  #   container_name: orderer1.neospykar.com
+  #   networks:
+  #     - neonetwork
+  ca.org1.neo.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.org1.neo.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/ca.org1.neo.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/5590db4484602c77592da9c3e2fdc03ebf1945db8ec3e6941d0984aa65b57be0_sk
+      - FABRIC_CA_SERVER_CA_CONF_FILE=/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    ports:
+      - 7054:7054
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.neo.com/ca/:/etc/hyperledger/fabric-ca-server
+      # - ./fabric-ca-server.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca.org1.neo.com
+    networks:
+      - neonetwork
+
+  # membersrvc:
+  #   image: hyperledger/fabric-membersrvc:$IMAGE_TAG
+  #   ports:
+  #     - 50051:50051
+  #   command: membersrvc
+  #   container_name: membersrvc
+  #   networks:
+  #     - neonetwork
+  # vp0:
+  #   image: hyperledger/fabric-peer:$IMAGE_TAG
+  #   ports:
+  #     - "5000:5000"
+  #     - "30303:30303"
+  #     - "30304:30304"
+  #   environment:
+  #     - CORE_PEER_ADDRESSAUTODETECT=true
+  #     - CORE_VM_ENDPOINT=unix:///var/run/docker.sock
+  #     - CORE_LOGGING_LEVEL=DEBUG
+  #     - CORE_PEER_ID=vp0
+  #     - CORE_SECURITY_ENROLLID=test_vp0
+  #     - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+  #   links:
+  #     - membersrvc
+  #   command: sh -c "sleep 5; peer node start"
+  # couchdb:
+  #   container_name: couchdb
+  #   image: hyperledger/fabric-couchdb
+  #   # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+  #   # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+  #   environment:
+  #     - couchdb_USER=
+  #     - couchdb_PASSWORD=
+  #   ports:
+  #     - 5984:5984
+  #   networks:
+  #     - neonetwork
+
+  peer0.org1.neo.com:
+    container_name: peer0.org1.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.org1.neo.com
+    networks:
+      - neonetwork
+    # links:
+    #   - membersrvc
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+
+  peer1.org1.neo.com:
+    container_name: peer1.org1.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.org1.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer2.org1.neo.com:
+    container_name: peer2.org1.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer2.org1.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer0.org2.neo.com:
+    container_name: peer0.org2.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.org2.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer1.org2.neo.com:
+    container_name: peer1.org2.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.org2.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer2.org2.neo.com:
+    container_name: peer2.org2.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer2.org2.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer0.org3.neo.com:
+    container_name: peer0.org3.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.org3.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer1.org3.neo.com:
+    container_name: peer1.org3.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.org3.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+  peer2.org3.neo.com:
+    container_name: peer2.org3.neo.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer2.org3.neo.com
+    networks:
+      - neonetwork
+    depends_on:
+      - orderer1.neo.com
+      # - couchdb
+    # links:
+    #   - membersrvc
+
+
+  # peer0.org4.neospykar.com:
+  #   container_name: peer0.org4.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer0.org4.neospykar.com
+  #   networks:
+  #     - neonetwork
+  #
+  # peer1.org4.neospykar.com:
+  #   container_name: peer1.org4.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer1.org4.neospykar.com
+  #   networks:
+  #     - neonetwork
+  #
+  # peer2.org4.neospykar.com:
+  #   container_name: peer2.org4.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer2.org4.neospykar.com
+  #   networks:
+  #     - neonetwork
+  #
+  #
+  # peer0.org5.neospykar.com:
+  #   container_name: peer0.org5.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer0.org5.neospykar.com
+  #   networks:
+  #     - neonetwork
+  #
+  # peer1.org5.neospykar.com:
+  #   container_name: peer1.org5.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer1.org5.neospykar.com
+  #   networks:
+  #     - neonetwork
+  #
+  # peer2.org5.neospykar.com:
+  #   container_name: peer2.org5.neospykar.com
+  #   extends:
+  #     file:  base/docker-compose-base.yaml
+  #     service: peer2.org5.neospykar.com
+  #   networks:
+  #     - neonetwork
+
+  cliorg1:
+    container_name: cliorg1
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      # - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cliorg1
+      - CORE_PEER_ADDRESS=peer0.org1.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.neo.com/peers/peer0.org1.neo.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.neo.com/peers/peer0.org1.neo.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.neo.com/peers/peer0.org1.neo.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.neo.com/users/Admin@org1.neo.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer1.neo.com
+      - ca.org1.neo.com
+      - peer0.org1.neo.com
+      - peer1.org1.neo.com
+      - peer2.org1.neo.com
+      - peer0.org2.neo.com
+      - peer1.org2.neo.com
+      - peer2.org2.neo.com
+      - peer0.org3.neo.com
+      - peer1.org3.neo.com
+      - peer2.org3.neo.com
+    networks:
+      - neonetwork
+
+  cliorg2:
+    container_name: cliorg2
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      # - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cliorg2
+      - CORE_PEER_ADDRESS=peer0.org2.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.neo.com/peers/peer0.org2.neo.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.neo.com/peers/peer0.org2.neo.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.neo.com/peers/peer0.org2.neo.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.neo.com/users/Admin@org2.neo.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer1.neo.com
+      - peer0.org1.neo.com
+      - peer1.org1.neo.com
+      - peer2.org1.neo.com
+      - peer0.org2.neo.com
+      - peer1.org2.neo.com
+      - peer2.org2.neo.com
+      - peer0.org3.neo.com
+      - peer1.org3.neo.com
+      - peer2.org3.neo.com
+    networks:
+      - neonetwork
+
+  cliorg3:
+    container_name: cliorg3
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      # - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cliorg3
+      - CORE_PEER_ADDRESS=peer0.org3.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.neo.com/peers/peer0.org3.neo.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.neo.com/peers/peer0.org3.neo.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.neo.com/peers/peer0.org3.neo.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.neo.com/users/Admin@org3.neo.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer1.neo.com
+      - peer0.org1.neo.com
+      - peer1.org1.neo.com
+      - peer2.org1.neo.com
+      - peer0.org2.neo.com
+      - peer1.org2.neo.com
+      - peer2.org2.neo.com
+      - peer0.org3.neo.com
+      - peer1.org3.neo.com
+      - peer2.org3.neo.com
+    networks:
+      - neonetwork

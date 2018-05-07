@@ -1,0 +1,145 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: neo.com
+    Specs:
+      - Hostname: orderer1
+      # - Hostname: orderer2
+  # - Name: OrdererUS
+  #   Domain: neospykar.com
+  #   Specs:
+  #     - Hostname: orderer1
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.neo.com
+    # EnableNodeOUs: true
+    Template:
+      Count: 3
+    Users:
+      Count: 2
+  - Name: Org2
+    Domain: org2.neo.com
+    # EnableNodeOUs: true
+    Template:
+      Count: 3
+    Users:
+      Count: 4
+  - Name: Org3
+    Domain: org3.neo.com
+    # EnableNodeOUs: true
+    Template:
+      Count: 3
+    Users:
+      Count: 5
+  # - Name: Org4
+  #   Domain: org4.neospykar.com
+  #   # EnableNodeOUs: true
+  #   Template:
+  #     Count: 3
+  #   Users:
+  #     Count: 5
+  # - Name: Org5
+  #   Domain: org5.neospykar.com
+  #   # EnableNodeOUs: true
+  #   Template:
+  #     Count: 7
+  #   Users:
+  #     Count: 5
+# NodeOUs:
+#   Enable: true
+#   ClientOUIdentifier:
+#     Certificate: "cacerts/cacert.pem"
+#     OrganizationalUnitIdentifier: "client"
+#   PeerOUIdentifier:
+#     Certificate: "cacerts/cacert.pem"
+#     OrganizationalUnitIdentifier: "peer"
+
+# ca:
+#   # Server's listening port (default: 7054)
+#   port: 7054
+
+#   # Enables debug logging (default: false)
+#   debug: true
+#   tls:
+#     # Enable TLS (default: false)
+#     enabled: true
+#     # TLS for the server's listening port (default: false)
+#     certfile: ca-cert.pem
+#     keyfile: ca-key.pem
+#   ca:
+#     name: "ca.neo.com"
+#     # Certificate file (default: ca-cert.pem)
+#     certfile: ca-cert.pem
+#     # Key file (default: ca-key.pem)
+#     keyfile: ca-key.pem
+#   registry:
+#     maxEnrollments: 0
+#     identities:
+#        - name: admin
+#          pass: adminpw
+#          type: client
+#          affiliation: ""
+#          attrs:
+#             hf.Registrar.Roles: "client,user,peer,validator,auditor,ca"
+#             hf.Registrar.DelegateRoles: "client,user,validator,auditor"
+#             hf.Revoker: true
+#             hf.IntermediateCA: true
+#   database:
+#     type: sqlite3
+#     datasource: fabric-ca-server.db
+#     tls:
+#         enabled: false
+#         certfiles:
+#           - db-server-cert.pem
+#         client:
+#           certfile: db-client-cert.pem
+#           keyfile: db-client-key.pem
+#   ldap:
+#      enabled: true
+#      url: ldap://<adminDN>:<adminPassword>@<host>:<port>/<base>
+#      tls:
+#         certfiles:
+#           - ldap-server-cert.pem
+#         client:
+#            certfile: ldap-client-cert.pem
+#            keyfile: ldap-client-key.pem
+#   affiliations:
+#      org0:
+#         - department1
+#         - department2
+#      org1:
+#         - department1
+#      org3:
+#         - department1
+#   signing:
+#       profiles:
+#         ca:
+#            usage:
+#              - cert sign
+#            expiry: 8000h
+#            caconstraint:
+#              isca: true
+#       default:
+#         usage:
+#           - cert sign
+#         expiry: 8000h
+#   csr:
+#      cn: fabric-ca-server
+#      names:
+#         - C: US
+#           ST: "North Carolina"
+#           L:
+#           O: Hyperledger
+#           OU: Fabric
+#      hosts:
+#        - 6b91ac4d5382
+#      ca:
+#         pathlen:
+#         pathlenzero:
+#         expiry:
+#   crypto:
+#     software:
+#        hash_family: SHA2
+#        security_level: 256
+#        ephemeral: false
+#        key_store_dir: keys

@@ -1,0 +1,429 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+
+  orderer1.neo.com:
+    container_name: orderer1.neo.com
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=DEBUG
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer1/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer1/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer1/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer1/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+    - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+    - ../crypto-config/ordererOrganizations/neo.com/orderers/orderer1.neo.com/msp:/var/hyperledger/orderer1/msp
+    - ../crypto-config/ordererOrganizations/neo.com/orderers/orderer1.neo.com/tls/:/var/hyperledger/orderer1/tls
+    - ./production/orderer:/var/hyperledger/production
+    # - orderer1.neo.com:/var/hyperledger/production/orderer1
+    ports:
+      - 7050:7050
+
+  # orderer2.neo.com:
+  #   container_name: orderer2.neo.com
+  #   image: hyperledger/fabric-orderer:$IMAGE_TAG
+  #   environment:
+  #     - ORDERER_GENERAL_LOGLEVEL=DEBUG
+  #     - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+  #     - ORDERER_GENERAL_GENESISMETHOD=file
+  #     - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer1/orderer.genesis.block
+  #     - ORDERER_GENERAL_LOCALMSPID=OrdererINMSP
+  #     - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer2/msp
+  #     # enabled TLS
+  #     - ORDERER_GENERAL_TLS_ENABLED=true
+  #     - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer2/tls/server.key
+  #     - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer2/tls/server.crt
+  #     - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer2/tls/ca.crt]
+  #   working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+  #   command: orderer
+  #   volumes:
+  #   - ../channel-artifacts/genesis.block:/var/hyperledger/orderer1/orderer.genesis.block
+  #   - ../crypto-config/ordererOrganizations/neo.com/orderers/orderer2.neo.com/msp:/var/hyperledger/orderer2/msp
+  #   - ../crypto-config/ordererOrganizations/neo.com/orderers/orderer2.neo.com/tls/:/var/hyperledger/orderer2/tls
+  #   - orderer2.neo.com:/var/hyperledger/production/orderer2
+  #   ports:
+  #     - 7060:7060
+
+  # orderer1.neospykar.com:
+  #   container_name: orderer1.neospykar.com
+  #   image: hyperledger/fabric-orderer:$IMAGE_TAG
+  #   environment:
+  #     - ORDERER_GENERAL_LOGLEVEL=DEBUG
+  #     - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+  #     - ORDERER_GENERAL_GENESISMETHOD=file
+  #     - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/neospykarorderer1/orderer.genesis.block
+  #     - ORDERER_GENERAL_LOCALMSPID=OrdererUSOrg
+  #     - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/neospykarorderer1/msp
+  #     # enabled TLS
+  #     - ORDERER_GENERAL_TLS_ENABLED=true
+  #     - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/neospykarorderer1/tls/server.key
+  #     - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/neospykarorderer1/tls/server.crt
+  #     - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/neospykarorderer1/tls/ca.crt]
+  #   working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+  #   command: orderer
+  #   volumes:
+  #   - ../channel-artifacts/genesis.block:/var/hyperledger/neospykarorderer1/orderer.genesis.block
+  #   - ../crypto-config/ordererOrganizations/neospykar.com/orderers/orderer1.neospykar.com/msp:/var/hyperledger/neospykarorderer1/msp
+  #   - ../crypto-config/ordererOrganizations/neospykar.com/orderers/orderer1.neospykar.com/tls/:/var/hyperledger/neospykarorderer1/tls
+  #   - orderer1.neospykar.com:/var/hyperledger/production/neospykarorderer1
+  #   ports:
+  #     - 8050:8050
+
+  peer0.org1.neo.com:
+    container_name: peer0.org1.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org1.neo.com
+      - CORE_PEER_ADDRESS=peer0.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_SECURITY_ENROLLID=peer01
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer0.org1.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer0.org1.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer0.org1.neo.com:/var/hyperledger/production\
+        - ./production/org1-peer0:/var/hyperledger/production
+    ports:
+      - 7051:7051
+      - 8054:8054
+
+  peer1.org1.neo.com:
+    container_name: peer1.org1.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org1.neo.com
+      - CORE_PEER_ADDRESS=peer1.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_SECURITY_ENROLLID=peer11
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer1.org1.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer1.org1.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer1.org1.neo.com:/var/hyperledger/production
+        - ./production/org1-peer1:/var/hyperledger/production
+
+    ports:
+      - 7052:7051
+      - 7055:8054
+
+  peer2.org1.neo.com:
+    container_name: peer2.org1.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer2.org1.neo.com
+      - CORE_PEER_ADDRESS=peer2.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org1.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_SECURITY_ENROLLID=peer21
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer2.org1.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org1.neo.com/peers/peer2.org1.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer2.org1.neo.com:/var/hyperledger/production
+        - ./production/org1-peer2:/var/hyperledger/production
+
+    ports:
+      - 7053:7051
+      - 7056:8054
+
+  peer0.org2.neo.com:
+    container_name: peer0.org2.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org2.neo.com
+      - CORE_PEER_ADDRESS=peer0.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_SECURITY_ENROLLID=peer02
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer0.org2.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer0.org2.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer0.org2.neo.com:/var/hyperledger/production
+        - ./production/org2-peer0:/var/hyperledger/production
+    ports:
+      - 7061:7051
+      - 7064:8054
+      # - 7061:7061
+      # - 7064:7064
+
+  peer1.org2.neo.com:
+    container_name: peer1.org2.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org2.neo.com
+      - CORE_PEER_ADDRESS=peer1.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_SECURITY_ENROLLID=peer12
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer1.org2.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer1.org2.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer1.org2.neo.com:/var/hyperledger/production
+        - ./production/org2-peer1:/var/hyperledger/production
+
+    ports:
+      - 7062:7051
+      - 7065:8054
+      # - 7062:7061
+      # - 7065:7064
+
+  peer2.org2.neo.com:
+    container_name: peer2.org2.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer2.org2.neo.com
+      - CORE_PEER_ADDRESS=peer2.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org2.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_SECURITY_ENROLLID=peer22
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer2.org2.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org2.neo.com/peers/peer2.org2.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer2.org2.neo.com:/var/hyperledger/production
+        - ./production/org2-peer2:/var/hyperledger/production
+
+    ports:
+      - 7063:7051
+      - 7066:8054
+      # - 7063:7061
+      # - 7066:7064
+
+  peer0.org3.neo.com:
+    container_name: peer0.org3.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org3.neo.com
+      - CORE_PEER_ADDRESS=peer0.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_SECURITY_ENROLLID=peer03
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer0.org3.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer0.org3.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer0.org3.neo.com:/var/hyperledger/production
+        - ./production/org3-peer0:/var/hyperledger/production
+    ports:
+      - 7071:7051
+      - 7074:8054
+      # - 7071:7071
+      # - 7074:7074
+
+  peer1.org3.neo.com:
+    container_name: peer1.org3.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org3.neo.com
+      - CORE_PEER_ADDRESS=peer1.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org3.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_SECURITY_ENROLLID=peer13
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer1.org3.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer1.org3.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer1.org3.neo.com:/var/hyperledger/production
+        - ./production/org3-peer1:/var/hyperledger/production
+
+    ports:
+      - 7072:7051
+      - 7075:8054
+      # - 7072:7071
+      # - 7075:7074
+
+  peer2.org3.neo.com:
+    container_name: peer2.org3.neo.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer2.org3.neo.com
+      - CORE_PEER_ADDRESS=peer2.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.neo.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org3.neo.com:7051
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_SECURITY_ENROLLID=peer23
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer2.org3.neo.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org3.neo.com/peers/peer2.org3.neo.com/tls:/etc/hyperledger/fabric/tls
+        # - peer2.org3.neo.com:/var/hyperledger/production
+        - ./production/org3-peer2:/var/hyperledger/production
+
+    ports:
+      - 7073:7051
+      - 7076:8054
+      # - 7073:7071
+      # - 7076:7074
+  #
+  # peer0.org4.neospykar.com:
+  #   container_name: peer0.org4.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer0.org4.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer0.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org4.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org4MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer0.org4.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer0.org4.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer0.org4.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8051:8051
+  #     - 8054:8054
+  #
+  # peer1.org4.neospykar.com:
+  #   container_name: peer1.org4.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer1.org4.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer1.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org4.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org4MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer1.org4.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer1.org4.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer1.org4.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8052:8051
+  #     - 8055:8054
+  #
+  # peer2.org4.neospykar.com:
+  #   container_name: peer2.org4.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer2.org4.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer2.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org4.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org4.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org4MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer2.org4.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org4.neospykar.com/peers/peer2.org4.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer2.org4.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8053:8051
+  #     - 8056:8054
+  #
+  # peer0.org5.neospykar.com:
+  #   container_name: peer0.org5.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer0.org5.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer0.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org5.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org5MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer0.org5.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer0.org5.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer0.org5.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8061:8061
+  #     - 8064:8064
+  #
+  # peer1.org5.neospykar.com:
+  #   container_name: peer1.org5.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer1.org5.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer1.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org5.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org5MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer1.org5.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer1.org5.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer1.org5.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8062:8061
+  #     - 8065:8064
+  #
+  # peer2.org5.neospykar.com:
+  #   container_name: peer2.org5.neospykar.com
+  #   extends:
+  #     file: peer-base.yaml
+  #     service: peer-base
+  #   environment:
+  #     - CORE_PEER_ID=peer2.org5.neospykar.com
+  #     - CORE_PEER_ADDRESS=peer2.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org5.neospykar.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org5.neospykar.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org5MSP
+  #   volumes:
+  #       - /var/run/:/host/var/run/
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer2.org5.neospykar.com/msp:/etc/hyperledger/fabric/msp
+  #       - ../crypto-config/peerOrganizations/org5.neospykar.com/peers/peer2.org5.neospykar.com/tls:/etc/hyperledger/fabric/tls
+  #       - peer2.org5.neospykar.com:/var/hyperledger/production
+  #   ports:
+  #     - 8063:8061
+  #     - 8066:8064
